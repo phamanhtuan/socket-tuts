@@ -18,6 +18,7 @@ void _Connect(int fd, const struct sockaddr *sa, socklen_t sa_length);
 void _Listen(int fd, int backlog);
 int _Select(int nFds, fd_set *readFds, fd_set *writeFds, fd_set *exceptFds, struct timeval *timeout);
 void _Shutdown(int fd, int how);
+void _Getsockname(int fd, struct sockaddr *sa, socklen_t sa_len_ptr);
 
 void _Write(int fd, void *ptr, size_t nbytes);
 
@@ -40,4 +41,8 @@ ssize_t _Read_line(int fd, void *ptr, size_t max_len);
 
 ssize_t _write_n(int fd, const void *vptr, size_t n);
 void _Write_n(int fd, void *ptr, size_t nbytes);
+
+// Unix
+ssize_t _Read(int fd, void *ptr, size_t nbytes);
+
 #endif

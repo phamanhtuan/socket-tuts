@@ -210,3 +210,16 @@ void _Shutdown(int fd, int how){
 		error("ERROR: shutdown error");
 	}
 }
+
+ssize_t _Read(int fd, void *ptr, size_t nbytes){
+	ssize_t n;
+	n = read(fd, ptr, nbytes);
+	if(n == -1)
+		error("ERROR(_Read): read error");
+	return n;
+}
+
+void _Getsockname(int fd, struct sockaddr *sa, socklen_t sa_length_ptr){
+	if(getsockname(fd,sa, sa_length_ptr) < 0)
+		error("ERROR(_Getsockname): getsockname error");
+}
