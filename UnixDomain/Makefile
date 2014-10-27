@@ -1,4 +1,4 @@
-exe: unixbind unixserv unixclient
+exe: unixbind unixserv unixclient mycat
 
 unixbind: unixbind.o
 	gcc -o unixbind unixbind.o -I../Lib ../Lib/error.o ../Lib/wrapper.o	
@@ -12,6 +12,9 @@ unixclient: unixclient.o
 	gcc -o unixclient unixclient.o -I../Lib ../Lib/error.o ../Lib/wrapper.o	
 unixclient.o: unixclient.c 
 	gcc -c unixclient.c -I../Lib 		
-
+mycat: mycat.o
+	gcc -o mycat mycat.o ../Lib/error.o ../Lib/wrapper.o
+mycat.o: mycat.c
+	gcc -c mycat.c -I../Lib 	
 clean: 
-	rm -f *.o unixbind unixclient unixserv
+	rm -f *.o unixbind unixclient unixserv mycat

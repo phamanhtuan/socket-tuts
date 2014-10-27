@@ -223,3 +223,8 @@ void _Getsockname(int fd, struct sockaddr *sa, socklen_t sa_length_ptr){
 	if(getsockname(fd,sa, sa_length_ptr) < 0)
 		error("ERROR(_Getsockname): getsockname error");
 }
+
+void _Socketpair(int family, int type, int protocol, int *fd){
+	if(socketpair(family, type, protocol, fd) < 0)
+		errro("(Socketpair) Socket pair error");
+}

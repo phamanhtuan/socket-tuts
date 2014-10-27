@@ -19,6 +19,7 @@ void _Listen(int fd, int backlog);
 int _Select(int nFds, fd_set *readFds, fd_set *writeFds, fd_set *exceptFds, struct timeval *timeout);
 void _Shutdown(int fd, int how);
 void _Getsockname(int fd, struct sockaddr *sa, socklen_t sa_len_ptr);
+void _Socketpair(int family, int type, int protocol, int *fd);
 
 void _Write(int fd, void *ptr, size_t nbytes);
 
