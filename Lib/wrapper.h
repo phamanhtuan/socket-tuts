@@ -7,13 +7,17 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <sys/select.h>
+
+#define max(a,b) (a>b? a:b)
 // wrap socket
 int _Accept(int fd, struct sockaddr *sa, socklen_t *sa_length_ptr);
 int _Socket(int family, int type, int protocol);
 void _Bind(int fd, const struct sockaddr *sa, socklen_t sa_length);
 void _Connect(int fd, const struct sockaddr *sa, socklen_t sa_length);
 void _Listen(int fd, int backlog);
-
+int _Select(int nFds, fd_set *readFds, fd_set *writeFds, fd_set *exceptFds, struct timeval *timeout);
+void _Shutdown(int fd, int how);
 
 void _Write(int fd, void *ptr, size_t nbytes);
 

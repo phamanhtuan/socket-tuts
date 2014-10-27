@@ -68,6 +68,7 @@ void handler_child_signal(int signal_no){
 	if(signal_no == SIGCHLD){
 		printf("Received SIGCHILD signal\n");
 		pid = wait(&stat);
+		close(connFd);
 		printf("Child %d terminated\n", pid );
 	}
 }

@@ -151,7 +151,7 @@ static char read_buf[4096];
 ssize_t my_read(int fd, char *ptr){
 	if(read_cnt <=0){
 		again:
-		if((read_cnt=read(fd, read_buf, sizeof(read_buf))) <= 0){
+		if((read_cnt=read(fd, read_buf, sizeof(read_buf))) < 0){
 			if(errno == EINTR)
 				goto again;
 			return -1;
@@ -172,6 +172,7 @@ ssize_t _read_line(int fd, void *vptr, size_t max_len){
 	ptr = vptr;
 	for(n=1; n < max_len; n++){
 		rc = my_read(fd, &c);
+		// printf("Log(_read_line): rc=%d\n", rc);
 		if(rc == 1){
 			*ptr = c;
 			ptr++;
@@ -194,4 +195,18 @@ ssize_t _Read_line(int fd, void *ptr, size_t max_len){
 	if((n=_read_line(fd, ptr, max_len)) <0)
 		error("ERROR: readline error");
 	return n;
+}
+
+int _Select(int nFds, fd_set *readFds, fd_set *writeFds, fd_set *exceptFds, struct timeval *timeout){
+	int n;
+	n = select(nFds, readFds, writeFds, exceptFds, timeout);
+	if(n < 0)
+		error("ERROR: select error");
+	return n;
+}
+
+void _Shutdown(int fd, int how){
+	if(shutdown(fd, how)<0){
+		error("ERROR: shutdown error");
+	}
 }
