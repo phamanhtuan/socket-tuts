@@ -8,8 +8,10 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <sys/select.h>
+#include <pthread.h>
 
 #define max(a,b) (a>b? a:b)
+
 // wrap socket
 int _Accept(int fd, struct sockaddr *sa, socklen_t *sa_length_ptr);
 int _Socket(int family, int type, int protocol);
@@ -45,5 +47,9 @@ void _Write_n(int fd, void *ptr, size_t nbytes);
 
 // Unix
 ssize_t _Read(int fd, void *ptr, size_t nbytes);
+pid_t _Wait_pid(pid_t pid, int *iptr, int options);
 
+// Thread
+void _Pthread_create(pthread_t *tid, const pthread_attr_t *attr, void *(func)(void *), void *arg);
+void _Pthread_detach(pthread_t tid);
 #endif

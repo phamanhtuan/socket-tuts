@@ -226,5 +226,32 @@ void _Getsockname(int fd, struct sockaddr *sa, socklen_t sa_length_ptr){
 
 void _Socketpair(int family, int type, int protocol, int *fd){
 	if(socketpair(family, type, protocol, fd) < 0)
-		errro("(Socketpair) Socket pair error");
+		error("(Socketpair) Socket pair error");
+}
+
+pid_t _Wait_pid(pid_t pid, int *iptr, int options){
+	pid_t repid;
+
+	repid = waitpid(pid, iptr, options);
+	if(pid == -1)
+		error("Waitpid error");
+	return pid;
+}
+
+void _Pthread_create(pthread_t *tid, const pthread_attr_t *attr, void *(*func)(void *), void *arg){
+	int n;
+	n = pthread_create(tid, attr, func, arg);
+	if(n == 0) 
+		return;
+	errno = n;
+	error("Pthread_create error");
+}
+
+void _Pthread_detach(pthread_t tid){
+	int n;
+	n = pthread_detach(tid);
+	if(n == 0) 
+		return;	
+	errno = n;
+	error("Pthread_detach error");
 }

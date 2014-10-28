@@ -9,11 +9,14 @@
 
 #define SERV_PORT 5000
 #define MAXLINE 4096
+
+void doit_thread(void *arg);
 void str_echo(int _connFd);
 void handler_child_signal(int);
 void handler_signal(int);
 int listenFd, connFd;
 int main(int argc, char ** argv){
+	pthread_t tid;
 	signal(SIGCHLD, handler_child_signal);
 	if(signal(SIGINT, handler_signal) == SIG_ERR)
 		printf("Can't catch SIGINT signal!\n");
@@ -35,13 +38,15 @@ int main(int argc, char ** argv){
 		connFd = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
 		myLog("Client connected:");
 		foreignSockfdPrint(connFd);
-		child_pid = _Fork();
-		if(child_pid == 0){
-			close(listenFd);
-			str_echo(connFd);			
-			exit(0);
-		}
-		close(connFd);
+		_Pthread_create(&tid, NULL, doit_thread, (void *) connFd);
+		// child_pid = _Fork();
+		// if(child_pid == 0){
+		// 	close(listenFd);
+		// 	str_echo(connFd);			
+		// 	exit(0);
+		// }
+		// close(connFd);
+
 	}
 
 }
@@ -78,4 +83,10 @@ void handler_signal(int signal_no){
 		close(connFd);
 		exit(0);
 	}
+}
+void doit_thread(void *arg){
+	_Pthread_detach(pthread_self());
+	str_echo((int) arg);
+	close((int)arg);
+	return NULL;
 }

@@ -5,13 +5,19 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/select.h>
+#include <pthread.h>
 
 #include <wrapper.h>
 #include <error.h>
 
 #define MAXLINE 4096
+
+static int sock_fd;
+static FILE *fp;
+
 void str_cli(FILE *fp, int sockFd);
 void str_cli_select(FILE *fp, int sockFd);
+void str_cli_thread(FILE *fp, int sock_fd_arg);
 void handler_signal(int );
 void handler_sigpipe(int );
 int main(int argc, char ** argv){
@@ -34,7 +40,7 @@ int main(int argc, char ** argv){
 	_Connect(sockFd, (struct sockaddr *) &server_addr, sizeof(server_addr));
 	myLog("Connected to server");
 	// str_cli(stdin, sockFd);
-	str_cli_select(stdin, sockFd);
+	str_cli_thread(stdin, sockFd);
 	exit(0);
 }
 
@@ -99,4 +105,23 @@ void str_cli_select(FILE *fp, int sockFd){
 		}
 	}
 }
+void copy_to(void *arg){
+	myLog("Thread created");
+	char send_line[MAXLINE];
+	while(_Fgets(send_line, MAXLINE, fp) != NULL)
+		_Write_n(sock_fd, send_line, strlen(send_line));
+	_Shutdown(sock_fd, SHUT_WR);
+	return (NULL);
+}
 
+void str_cli_thread(FILE *fp_arg, int sock_fd_arg){
+	char recv_line[MAXLINE];
+	pthread_t tid;
+	sock_fd = sock_fd_arg;
+	fp = fp_arg;
+
+	_Pthread_create(&tid, NULL, copy_to, NULL);
+
+	while(_Read_line(sock_fd, recv_line, MAXLINE) > 0)
+		_Fputs(recv_line, stdout);
+}
