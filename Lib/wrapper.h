@@ -48,8 +48,9 @@ void _Write_n(int fd, void *ptr, size_t nbytes);
 // Unix
 ssize_t _Read(int fd, void *ptr, size_t nbytes);
 pid_t _Wait_pid(pid_t pid, int *iptr, int options);
-
+int _Fcntl(int fd, int cmd, int arg);
 // Thread
 void _Pthread_create(pthread_t *tid, const pthread_attr_t *attr, void *(func)(void *), void *arg);
 void _Pthread_detach(pthread_t tid);
+void *_Malloc(size_t size);
 #endif

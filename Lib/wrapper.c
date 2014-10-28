@@ -255,3 +255,19 @@ void _Pthread_detach(pthread_t tid){
 	errno = n;
 	error("Pthread_detach error");
 }
+
+void *_Malloc(size_t size){
+	void *ptr;
+	ptr = malloc(size);
+	if(ptr == NULL)
+		error("Malloc error");
+	return ptr;
+}
+
+int _Fcntl(int fd, int cmd, int arg){
+	int n;
+	n = fcntl(fd, cmd, arg);
+	if(n == -1)
+		error("Fcntl error");
+	return n;
+}

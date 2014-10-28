@@ -16,6 +16,7 @@ void handler_child_signal(int);
 void handler_signal(int);
 int listenFd, connFd;
 int main(int argc, char ** argv){
+	int *iptr;
 	pthread_t tid;
 	signal(SIGCHLD, handler_child_signal);
 	if(signal(SIGINT, handler_signal) == SIG_ERR)
@@ -35,10 +36,13 @@ int main(int argc, char ** argv){
 	myLog("Start listening ...");
 	for(; ;){
 		cli_length = sizeof(client_addr);
-		connFd = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
+		iptr  = (int *) (_Malloc(sizeof(int)));
+		*iptr = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
+		// connFd = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
 		myLog("Client connected:");
 		foreignSockfdPrint(connFd);
-		_Pthread_create(&tid, NULL, doit_thread, (void *) connFd);
+		_Pthread_create(&tid, NULL, doit_thread, (void *) iptr);
+		// _Pthread_create(&tid, NULL, doit_thread, (void *) connFd);
 		// child_pid = _Fork();
 		// if(child_pid == 0){
 		// 	close(listenFd);
@@ -85,8 +89,11 @@ void handler_signal(int signal_no){
 	}
 }
 void doit_thread(void *arg){
+	int conn_fd;
+	conn_fd = *(int *)(arg);
+	free(arg);
 	_Pthread_detach(pthread_self());
-	str_echo((int) arg);
-	close((int)arg);
+	str_echo(conn_fd);
+	close(conn_fd);
 	return NULL;
 }

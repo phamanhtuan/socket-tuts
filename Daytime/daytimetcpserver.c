@@ -30,7 +30,7 @@ int main(int argc, char ** argv){
 	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	// inet_pton(AF_INET, "10.61.153.55", &(serv_addr.sin_addr));	
 	// inet_aton("10.61.153.55", &serv_addr.sin_addr.s_addr);	
-	serv_addr.sin_port = htons(13);
+	serv_addr.sin_port = htons(9000);
 
 	_Bind(listenFd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
 	_Listen(listenFd, 5);	
