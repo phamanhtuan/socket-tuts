@@ -271,3 +271,74 @@ int _Fcntl(int fd, int cmd, int arg){
 		error("Fcntl error");
 	return n;
 }
+
+int tcp_connect(const char *host, const char *serv){
+	int sock_fd, n;
+	struct addrinfo hints, *res, *res_save;
+
+	bzero(&hints, sizeof(struct addrinfo));
+
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+	hints.ai_protocol = 0;
+	hints.ai_canonname = NULL;
+	hints.ai_addr = NULL;
+	hints.ai_next = NULL;
+
+	n = getaddrinfo(host, serv, &hints, &res);
+	myLog("Connecting");
+	printf("n=%d\n", n);
+	if(n != 0){
+		char msg_error[256];
+		sprintf(msg_error, "tcp_connect error for %s %s %s", host, serv, gai_strerror(n));
+		error(msg_error);
+	}	
+	res_save = res;
+	printf("res->ai_family=%d\n", res->ai_family);
+	printf("res->ai_addrlen=%d\n", res->ai_addrlen);
+	do{
+		sock_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+		
+		if(sock_fd < 0)
+			continue;
+		printf("Loop: sock_fd=%d\n", sock_fd);
+		n = connect(sock_fd, res->ai_addr, res->ai_addrlen);
+		printf("Loop: n=%d\n", n);
+		if(n == 0)
+			break;
+
+		close(sock_fd);
+		res = res->ai_next;
+	}while(res != NULL);
+
+	if(res == NULL){
+		char msg_error[256];
+		sprintf(msg_error, "tcp_connect error for %s %s", host, serv);
+		error(msg_error);
+	}
+	
+	freeaddrinfo(res_save);
+	return sock_fd;
+}
+
+struct addrinfo* _Host_serv(const char *host, const char *serv, int family, int sock_type){
+	int n;
+	struct addrinfo hints, *res;
+
+	bzero(&hints, sizeof(struct addrinfo));
+	hints.ai_flags = AI_CANONNAME;
+	hints.ai_family = family;
+	hints.ai_socktype = sock_type;
+
+	n = getaddrinfo(host, serv, &hints, &res);
+	if(n != 0){
+		char msg_error[256];
+		sprintf(msg_error, "tcp_connect error for %s %s %s", 
+				(host == NULL)? "no hostname": host, 
+				(serv == NULL)? "no service name": serv, 
+				gai_strerror(n));
+		error(msg_error);
+	}
+	return res;
+}

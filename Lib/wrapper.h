@@ -9,8 +9,10 @@
 #include <errno.h>
 #include <sys/select.h>
 #include <pthread.h>
+#include <netdb.h>
 
 #define max(a,b) (a>b? a:b)
+#define min(a,b) (a<b? a:b)
 
 // wrap socket
 int _Accept(int fd, struct sockaddr *sa, socklen_t *sa_length_ptr);
@@ -53,4 +55,8 @@ int _Fcntl(int fd, int cmd, int arg);
 void _Pthread_create(pthread_t *tid, const pthread_attr_t *attr, void *(func)(void *), void *arg);
 void _Pthread_detach(pthread_t tid);
 void *_Malloc(size_t size);
+
+// Tcp_connect
+int tcp_connect(const char *host, const char *serv);
+struct addrinfo* _Host_serv(const char *host, const char *serv, int family, int sock_type);
 #endif
