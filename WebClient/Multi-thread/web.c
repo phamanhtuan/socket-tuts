@@ -16,10 +16,11 @@ struct file {
 #define F_CONNECTING	1
 #define F_READING		2
 #define F_DONE			4
-
+#define F_JOINED		8
 #define GET_CMD		"GET %s HTTP/1.0 \r\n\r\n"
-
-pthread_mutex_t conn_mutext = PTHREAD_MUTEX_INITIALIZER;
+int n_done;
+pthread_mutex_t n_done_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t n_done_cond = PTHREAD_COND_INITIALIZER;
 int n_conn, n_files, n_left_to_conn, n_left_to_read;
 void * do_get_read(void *vptr);
 void homepage(const char *, const char *);
@@ -47,7 +48,7 @@ int main(int argc, char **argv){
 	homepage(argv[2], argv[3]);
 	n_left_to_conn = n_left_to_read = n_files;
 	n_conn = 0;
-
+	n_done = 0;
 	while(n_left_to_read > 0){
 		while(n_conn < max_nconn && n_left_to_conn > 0){
 			for(i = 0; i < n_files; i++)
@@ -72,6 +73,26 @@ int main(int argc, char **argv){
 		// n_conn--;
 		// n_left_to_read--;
 		// printf("thread id %d for %s done\n", tid, fptr->name );
+		_Pthread_mutex_lock(&n_done_mutex);
+		while(n_done == 0)
+			_Pthread_cond_wait(&n_done_cond, &n_done_mutex);
+		for(i = 0; i < n_files; i++){
+			if(files[i].flag == F_DONE){
+				// myLog("Thread done");
+				printf("tid=%u\n", files[i].tid );
+				_Pthread_join(files[i].tid, (void **) &fptr);
+				// myLog("------");
+				if(fptr != &files[i]){
+					error("fptr != &file[i]");
+				}
+				fptr->flag = F_JOINED;
+				n_done--;
+				n_conn--;
+				n_left_to_read--;
+				printf("Thread id %u for %s done\n", tid, fptr->name );
+			}
+		}
+		_Pthread_mutex_unlock(&n_done_mutex);
 	}
 	exit(0);
 }
@@ -99,13 +120,18 @@ void * do_get_read(void *vptr){
 	printf("end-of-file on %s\n", fptr->name);
 	close(fd);
 
+	_Pthread_mutex_lock(&n_done_mutex);
 	fptr->flag = F_DONE;
-
-	_Pthread_mutex_lock(&conn_mutext);
-	n_conn--;
-	n_left_to_read--;
-	printf("thread id %u for %s done\n", pthread_self(), fptr->name );
-	_Pthread_mutex_unlock(&conn_mutext);
+	n_done ++;
+	myLog("Emit signal");
+	_Pthread_cond_signal(&n_done_cond);
+	// fptr->flag = F_DONE;
+	// n_conn--;
+	// n_left_to_read--;
+	// printf("thread id %u for %s done\n", pthread_self(), fptr->name );
+	myLog("Release mutex");
+	_Pthread_mutex_unlock(&n_done_mutex);
+	myLog("Exit func");
 	return (fptr);
 }
 

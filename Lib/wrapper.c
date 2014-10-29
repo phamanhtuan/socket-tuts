@@ -361,3 +361,33 @@ void _Pthread_mutex_unlock(pthread_mutex_t *mptr){
 	errno = n;
 	error("pthread_mutex_unlock error");
 }
+
+void _Pthread_cond_signal(pthread_cond_t *cptr){
+	int n;
+	n = pthread_cond_signal(cptr);
+	if(n == 0)
+		return;
+	errno = n;
+	error("pthread_cond_signal error");
+}
+
+void _Pthread_cond_wait(pthread_cond_t *cptr, pthread_mutex_t *mptr){
+	int n;
+
+	n = pthread_cond_wait(cptr, mptr);
+	if(n == 0)
+		return;
+	errno = n;
+	error("pthread_cond_wait error");
+}
+
+void _Pthread_join(pthread_t tid, void **status){
+	int n;
+	// myLog("Joining");
+	n = pthread_join(tid, status);
+	// myLog("Joined");
+	if(n == 0)
+		return;
+	errno = n;
+	error("pthread_join error");
+}

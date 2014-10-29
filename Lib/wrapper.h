@@ -57,6 +57,10 @@ void _Pthread_detach(pthread_t tid);
 void *_Malloc(size_t size);
 void _Pthread_mutext_lock(pthread_mutex_t *mptr);
 void _Pthread_mutext_unlock(pthread_mutex_t *mptr);
+void _Pthread_cond_signal(pthread_cond_t *cptr);
+void _Pthread_cond_wait(pthread_cond_t *cptr, pthread_mutex_t *mptr);
+void _Pthread_join(pthread_t tid, void **status);
+
 // Tcp_connect
 int tcp_connect(const char *host, const char *serv);
 struct addrinfo* _Host_serv(const char *host, const char *serv, int family, int sock_type);
