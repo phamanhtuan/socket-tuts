@@ -295,16 +295,16 @@ int tcp_connect(const char *host, const char *serv){
 		error(msg_error);
 	}	
 	res_save = res;
-	printf("res->ai_family=%d\n", res->ai_family);
-	printf("res->ai_addrlen=%d\n", res->ai_addrlen);
+	// printf("res->ai_family=%d\n", res->ai_family);
+	// printf("res->ai_addrlen=%d\n", res->ai_addrlen);
 	do{
 		sock_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 		
 		if(sock_fd < 0)
 			continue;
-		printf("Loop: sock_fd=%d\n", sock_fd);
+		// printf("Loop: sock_fd=%d\n", sock_fd);
 		n = connect(sock_fd, res->ai_addr, res->ai_addrlen);
-		printf("Loop: n=%d\n", n);
+		// printf("Loop: n=%d\n", n);
 		if(n == 0)
 			break;
 
@@ -341,4 +341,23 @@ struct addrinfo* _Host_serv(const char *host, const char *serv, int family, int 
 		error(msg_error);
 	}
 	return res;
+}
+
+void _Pthread_mutex_lock(pthread_mutex_t *mptr){
+	int n;
+	n = pthread_mutex_lock(mptr);
+	if(n == 0)
+		return;
+
+	errno = n;
+	error("pthread_mutex_lock error");
+}
+void _Pthread_mutex_unlock(pthread_mutex_t *mptr){
+	int n;
+	n = pthread_mutex_unlock(mptr);
+	if(n == 0)
+		return;
+
+	errno = n;
+	error("pthread_mutex_unlock error");
 }
