@@ -24,9 +24,9 @@ int _Select(int nFds, fd_set *readFds, fd_set *writeFds, fd_set *exceptFds, stru
 void _Shutdown(int fd, int how);
 void _Getsockname(int fd, struct sockaddr *sa, socklen_t sa_len_ptr);
 void _Socketpair(int family, int type, int protocol, int *fd);
-
 void _Write(int fd, void *ptr, size_t nbytes);
-
+void _Getsockopt(int fd, int level, int optname, void *optval, socklen_t *opt_len_ptr);
+void _Setsockopt(int fd, int level, int optname, const void *optval, socklen_t opt_len);
 pid_t _Fork();
 
 void myLog(const char *msg);

@@ -391,3 +391,14 @@ void _Pthread_join(pthread_t tid, void **status){
 	errno = n;
 	error("pthread_join error");
 }
+
+void _Getsockopt(int fd, int level, int optname, void *optval, socklen_t *opt_len_ptr){
+	if(getsockopt(fd, level, optname, optval, opt_len_ptr) < 0){
+		error("get sockopt error");
+	}
+}
+void _Setsockopt(int fd, int level, int optname, const void *optval, socklen_t opt_len){
+	if(setsockopt(fd, level, optname, optval, opt_len) < 0){
+		error("set sockopt error");
+	}
+}
