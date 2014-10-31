@@ -106,8 +106,8 @@ void str_cli_select(FILE *fp, int sockFd){
 		if(FD_ISSET(fileno(fp), &rset)){
 			if(_Fgets(sendLine, MAXLINE, fp) == NULL){
 				stdineof = 1;
-				close(sockFd);
-				// _Shutdown(sockFd, SHUT_WR);
+				// close(sockFd);
+				_Shutdown(sockFd, SHUT_WR);
 				FD_CLR(fileno(fp), &rset);
 				continue;				
 			}
@@ -123,8 +123,8 @@ void copy_to(void *arg){
 		printf("len = %d\n", strlen(send_line));
 		_Write_n(sock_fd, send_line, strlen(send_line));
 	}
-	close(sock_fd);
-	 // _Shutdown(sock_fd, SHUT_WR);
+	// close(sock_fd);
+	 _Shutdown(sock_fd, SHUT_WR);
 	return (NULL);
 }
 
@@ -134,9 +134,8 @@ void str_cli_thread(FILE *fp_arg, int sock_fd_arg){
 	sock_fd = sock_fd_arg;
 	fp = fp_arg;
 
-	_Pthread_create(&tid, NULL, copy_to, NULL);
-	// close(fp);
+	_Pthread_create(&tid, NULL, copy_to, NULL);	
 	while(_Read_line(sock_fd, recv_line, MAXLINE) > 0)
 		_Fputs(recv_line, stdout);
-	close(fp);	
+	// close(fp);	
 }

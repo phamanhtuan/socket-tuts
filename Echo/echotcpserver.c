@@ -19,8 +19,8 @@ int main(int argc, char ** argv){
 	int *iptr;
 	pthread_t tid;
 	signal(SIGCHLD, handler_child_signal);
-	if(signal(SIGINT, handler_signal) == SIG_ERR)
-		printf("Can't catch SIGINT signal!\n");
+	// if(signal(SIGINT, handler_signal) == SIG_ERR)
+	// 	printf("Can't catch SIGINT signal!\n");
 	pid_t child_pid;
 	socklen_t cli_length;
 	struct sockaddr_in client_addr, serv_addr;
@@ -36,9 +36,9 @@ int main(int argc, char ** argv){
 	myLog("Start listening ...");
 	for(; ;){
 		cli_length = sizeof(client_addr);
-		iptr  = (int *) (_Malloc(sizeof(int)));
-		*iptr = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
-		// connFd = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
+		// iptr  = (int *) (_Malloc(sizeof(int)));
+		// *iptr = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
+		connFd = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
 		myLog("Client connected:");
 		foreignSockfdPrint(connFd);
 		// _Pthread_create(&tid, NULL, doit_thread, (void *) iptr);
@@ -62,23 +62,22 @@ void str_echo(int sockFd){
 		while((n=read(sockFd, buffer, MAXLINE)) > 0){
 			myLog("Received data");
 			printf("%s (%d)", buffer, n );
-			// write(sockFd, buffer, n);
-			// myLog("Sent back\n");
+			write(sockFd, buffer, n);
+			myLog("Sent back\n");
 		}
 		if(n<0 && errno == EINTR)
 			goto again;
 		else
 			if(n<0)
 				error("ERROR(str_echo): read error");		
-		close(sockFd);	
+		// close(sockFd);	
 }
 void handler_child_signal(int signal_no){
 	pid_t pid;
 	int stat;
 	if(signal_no == SIGCHLD){
 		printf("Received SIGCHILD signal\n");
-		pid = wait(&stat);
-		close(connFd);
+		pid = wait(&stat);		
 		printf("Child %d terminated\n", pid );
 	}
 }
