@@ -41,15 +41,15 @@ int main(int argc, char ** argv){
 		// connFd = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
 		myLog("Client connected:");
 		foreignSockfdPrint(connFd);
-		_Pthread_create(&tid, NULL, doit_thread, (void *) iptr);
+		// _Pthread_create(&tid, NULL, doit_thread, (void *) iptr);
 		// _Pthread_create(&tid, NULL, doit_thread, (void *) connFd);
-		// child_pid = _Fork();
-		// if(child_pid == 0){
-		// 	close(listenFd);
-		// 	str_echo(connFd);			
-		// 	exit(0);
-		// }
-		// close(connFd);
+		child_pid = _Fork();
+		if(child_pid == 0){
+			close(listenFd);
+			str_echo(connFd);			
+			exit(0);
+		}
+		close(connFd);
 
 	}
 
@@ -61,15 +61,16 @@ void str_echo(int sockFd){
 	again:
 		while((n=read(sockFd, buffer, MAXLINE)) > 0){
 			myLog("Received data");
-			printf("%s", buffer );
-			write(sockFd, buffer, n);
-			myLog("Sent back\n");
+			printf("%s (%d)", buffer, n );
+			// write(sockFd, buffer, n);
+			// myLog("Sent back\n");
 		}
 		if(n<0 && errno == EINTR)
 			goto again;
 		else
 			if(n<0)
-				error("ERROR(str_echo): read error");			
+				error("ERROR(str_echo): read error");		
+		close(sockFd);	
 }
 void handler_child_signal(int signal_no){
 	pid_t pid;
@@ -85,6 +86,7 @@ void handler_signal(int signal_no){
 	if(signal_no == SIGINT){
 		printf("Received SIGINT signal\n");		
 		close(connFd);
+		close(listenFd);
 		exit(0);
 	}
 }

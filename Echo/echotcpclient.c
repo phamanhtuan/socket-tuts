@@ -7,6 +7,8 @@
 #include <sys/select.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <fcntl.h>
+
 #include <wrapper.h>
 #include <error.h>
 
@@ -23,7 +25,7 @@ void handler_sigpipe(int );
 int main(int argc, char ** argv){
 	if(signal(SIGINT, handler_signal) == SIG_ERR)
 		printf("Can't catch SIGINT signal!\n");
-	signal(SIGPIPE, handler_signal);
+	// signal(SIGPIPE, handler_signal);
 	int sockFd;
 	struct sockaddr_in server_addr;
 
@@ -37,10 +39,16 @@ int main(int argc, char ** argv){
 	server_addr.sin_port = htons(5000);
 	inet_pton(AF_INET, argv[1], &server_addr.sin_addr);
 
+	int rcv_lo_wat_val, len;
+	rcv_lo_wat_val = 5;
+	len = sizeof(rcv_lo_wat_val);
+	_Setsockopt(sockFd, SOL_SOCKET, SO_RCVLOWAT, &rcv_lo_wat_val, len);
+
 	_Connect(sockFd, (struct sockaddr *) &server_addr, sizeof(server_addr));
 	myLog("Connected to server");
 	// str_cli(stdin, sockFd);
 	str_cli_thread(stdin, sockFd);
+	// str_cli_select(stdin, sockFd);
 	exit(0);
 }
 
@@ -64,6 +72,7 @@ void str_cli(FILE *fp, int sockFd){
 void handler_signal(int signal_no){
 	if(signal_no == SIGINT){
 		printf("Received INT signal\n");
+		close(sock_fd);
 		exit(0);
 	}
 }
@@ -87,7 +96,7 @@ void str_cli_select(FILE *fp, int sockFd){
 		_Select(maxFdp1, &rset, NULL, NULL, NULL);
 
 		if(FD_ISSET(sockFd, &rset)){
-			if(_Read_line(sockFd, recvLine, MAXLINE) == 0)
+			if(_Read(sockFd, recvLine, 100) == 0)
 				if(stdineof == 1)
 					return;
 				else
@@ -97,10 +106,12 @@ void str_cli_select(FILE *fp, int sockFd){
 		if(FD_ISSET(fileno(fp), &rset)){
 			if(_Fgets(sendLine, MAXLINE, fp) == NULL){
 				stdineof = 1;
-				_Shutdown(sockFd, SHUT_WR);
+				close(sockFd);
+				// _Shutdown(sockFd, SHUT_WR);
 				FD_CLR(fileno(fp), &rset);
 				continue;				
 			}
+			printf("send %d bytes\n", strlen(sendLine) );
 			_Write_n(sockFd, sendLine, strlen(sendLine));
 		}
 	}
@@ -108,9 +119,12 @@ void str_cli_select(FILE *fp, int sockFd){
 void copy_to(void *arg){
 	myLog("Thread created");
 	char send_line[MAXLINE];
-	while(_Fgets(send_line, MAXLINE, fp) != NULL)
+	while(_Fgets(send_line, MAXLINE, fp) != NULL){
+		printf("len = %d\n", strlen(send_line));
 		_Write_n(sock_fd, send_line, strlen(send_line));
-	_Shutdown(sock_fd, SHUT_WR);
+	}
+	close(sock_fd);
+	 // _Shutdown(sock_fd, SHUT_WR);
 	return (NULL);
 }
 
@@ -121,7 +135,8 @@ void str_cli_thread(FILE *fp_arg, int sock_fd_arg){
 	fp = fp_arg;
 
 	_Pthread_create(&tid, NULL, copy_to, NULL);
-
+	// close(fp);
 	while(_Read_line(sock_fd, recv_line, MAXLINE) > 0)
 		_Fputs(recv_line, stdout);
+	close(fp);	
 }
