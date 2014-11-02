@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <sys/select.h>
 #include <pthread.h>
+#include <fcntl.h>
 
 #include <wrapper.h>
 #include <error.h>
@@ -37,10 +38,16 @@ int main(int argc, char ** argv){
 	server_addr.sin_port = htons(5000);
 	inet_pton(AF_INET, argv[1], &server_addr.sin_addr);
 
+	int rcv_lo_wat_val, len;
+	rcv_lo_wat_val = 5;
+	len = sizeof(rcv_lo_wat_val);
+	_Setsockopt(sockFd, SOL_SOCKET, SO_RCVLOWAT, &rcv_lo_wat_val, len);
+
 	_Connect(sockFd, (struct sockaddr *) &server_addr, sizeof(server_addr));
 	myLog("Connected to server");
 	// str_cli(stdin, sockFd);
-	str_cli_thread(stdin, sockFd);
+	// str_cli_thread(stdin, sockFd);
+	str_cli_select(stdin, sockFd);
 	exit(0);
 }
 
@@ -87,7 +94,7 @@ void str_cli_select(FILE *fp, int sockFd){
 		_Select(maxFdp1, &rset, NULL, NULL, NULL);
 
 		if(FD_ISSET(sockFd, &rset)){
-			if(_Read_line(sockFd, recvLine, MAXLINE) == 0)
+			if(_Read(sockFd, recvLine, 100) == 0)
 				if(stdineof == 1)
 					return;
 				else
@@ -101,6 +108,7 @@ void str_cli_select(FILE *fp, int sockFd){
 				FD_CLR(fileno(fp), &rset);
 				continue;				
 			}
+			printf("send %d bytes\n", strlen(sendLine) );
 			_Write_n(sockFd, sendLine, strlen(sendLine));
 		}
 	}
