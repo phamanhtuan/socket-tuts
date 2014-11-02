@@ -61,7 +61,7 @@ void str_echo(int sockFd){
 	again:
 		while((n=read(sockFd, buffer, MAXLINE)) > 0){
 			myLog("Received data");
-			printf("%s", buffer );
+			printf("%s (%d)", buffer, n );
 			write(sockFd, buffer, n);
 			myLog("Sent back\n");
 		}

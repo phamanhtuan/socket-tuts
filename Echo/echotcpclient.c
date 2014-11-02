@@ -108,8 +108,10 @@ void str_cli_select(FILE *fp, int sockFd){
 void copy_to(void *arg){
 	myLog("Thread created");
 	char send_line[MAXLINE];
-	while(_Fgets(send_line, MAXLINE, fp) != NULL)
+	while(_Fgets(send_line, MAXLINE, fp) != NULL){
+		printf("len = %d\n", strlen(send_line));
 		_Write_n(sock_fd, send_line, strlen(send_line));
+	}
 	_Shutdown(sock_fd, SHUT_WR);
 	return (NULL);
 }
