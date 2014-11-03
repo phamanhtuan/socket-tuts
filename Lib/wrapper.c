@@ -47,14 +47,18 @@ void myLog(const char *msg){
 }
 
 int foreignSockfdPrint(int _sockFd){
+	
 	struct sockaddr_in ss;
 	socklen_t len;
 	len = sizeof(ss);
+	
 	int port = getpeername(_sockFd, (struct sockaddr *) &ss, &len);
 	if(port < 0)
 		return -1;
-	printf("Foreign IP: %s\n", inet_ntoa(ss.sin_addr));
+
+	printf("Foreign IP: %d\n", inet_ntoa(ss.sin_addr));
 	printf("Foreign Port: %d\n", (ss.sin_port));
+
 	return 0;
 }
 int localSockfdPrint(int _sockFd){
@@ -402,3 +406,4 @@ void _Setsockopt(int fd, int level, int optname, const void *optval, socklen_t o
 	if(setsockopt(fd, level, optname, optval, opt_len) < 0){
 		error("set sockopt error");
 	}
+}

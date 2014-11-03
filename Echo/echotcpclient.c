@@ -47,8 +47,8 @@ int main(int argc, char ** argv){
 	_Connect(sockFd, (struct sockaddr *) &server_addr, sizeof(server_addr));
 	myLog("Connected to server");
 	// str_cli(stdin, sockFd);
-	str_cli_thread(stdin, sockFd);
-	// str_cli_select(stdin, sockFd);
+	// str_cli_thread(stdin, sockFd);
+	str_cli_select(stdin, sockFd);
 	exit(0);
 }
 
@@ -59,9 +59,9 @@ void str_cli(FILE *fp, int sockFd){
 
 		_Write_n(sockFd, sendLine, strlen(sendLine));		
 		myLog("Sent data");
-		sleep(1);
-		_Write_n(sockFd, sendLine+1, strlen(sendLine)-1);		
-		myLog("Sent 2nd-data");
+		// sleep(1);
+		// _Write_n(sockFd, sendLine+1, strlen(sendLine)-1);		
+		// myLog("Sent 2nd-data");
 
 		if(_Read_line(sockFd, recvLine, MAXLINE) == 0)
 			error("Server terminated");
@@ -101,7 +101,8 @@ void str_cli_select(FILE *fp, int sockFd){
 					return;
 				else
 					error("Server terminated");
-			_Fputs(recvLine, stdout);
+			printf("Received(%d):\n", strlen(recvLine));
+			_Fputs(recvLine, stdout);			
 		}
 		if(FD_ISSET(fileno(fp), &rset)){
 			if(_Fgets(sendLine, MAXLINE, fp) == NULL){
@@ -111,8 +112,8 @@ void str_cli_select(FILE *fp, int sockFd){
 				FD_CLR(fileno(fp), &rset);
 				continue;				
 			}
-			printf("send %d bytes\n", strlen(sendLine) );
-			_Write_n(sockFd, sendLine, strlen(sendLine));
+			printf("Send %d bytes\n", strlen(sendLine) );
+			_Write_n(sockFd, sendLine, strlen(sendLine));								
 		}
 	}
 }

@@ -9,7 +9,7 @@ int main(int argc, char *argv){
 	int	opt_len;
 
 	sock_fd = _Socket(AF_INET, SOCK_STREAM, 0);
-	mss = 20;
+	mss = 666;
 	opt_len = sizeof(mss);
 	_Setsockopt(sock_fd, IPPROTO_TCP, TCP_MAXSEG, &mss, opt_len);
 	_Getsockopt(sock_fd, IPPROTO_TCP, TCP_MAXSEG, &mss, &opt_len);

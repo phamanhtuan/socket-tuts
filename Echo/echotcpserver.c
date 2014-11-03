@@ -36,20 +36,20 @@ int main(int argc, char ** argv){
 	myLog("Start listening ...");
 	for(; ;){
 		cli_length = sizeof(client_addr);
-		// iptr  = (int *) (_Malloc(sizeof(int)));
-		// *iptr = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
-		connFd = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
+		iptr  = (int *) (_Malloc(sizeof(int)));
+		*iptr = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
+		// connFd = _Accept(listenFd, (struct sockaddr *) NULL, NULL);
 		myLog("Client connected:");
 		foreignSockfdPrint(connFd);
-		// _Pthread_create(&tid, NULL, doit_thread, (void *) iptr);
+		_Pthread_create(&tid, NULL, doit_thread, (void *) iptr);
 		// _Pthread_create(&tid, NULL, doit_thread, (void *) connFd);
-		child_pid = _Fork();
-		if(child_pid == 0){
-			close(listenFd);
-			str_echo(connFd);			
-			exit(0);
-		}
-		close(connFd);
+		// child_pid = _Fork();
+		// if(child_pid == 0){
+		// 	close(listenFd);
+		// 	str_echo(connFd);			
+		// 	exit(0);
+		// }
+		// close(connFd);
 
 	}
 
@@ -60,8 +60,8 @@ void str_echo(int sockFd){
 	char buffer[MAXLINE];
 	again:
 		while((n=read(sockFd, buffer, MAXLINE)) > 0){
-			myLog("Received data");
-			printf("%s (%d)", buffer, n );
+			myLog("Received data: ");
+			printf("%s(%d)", buffer, n );
 			write(sockFd, buffer, n);
 			myLog("Sent back\n");
 		}
@@ -95,6 +95,7 @@ void doit_thread(void *arg){
 	free(arg);
 	_Pthread_detach(pthread_self());
 	str_echo(conn_fd);
+	printf("Thread terminated!\n");
 	close(conn_fd);
 	return NULL;
 }
